@@ -1,7 +1,7 @@
 # Expansion_Spatial_Transcriptomics
 Expansion Spatial Transcriptomics data analysis from:
 
-Expansion Spatial Transcriptomics
+Expansion Spatial Transcriptomics\
 Yuhang Fan, Zaneta Andrusivova, Yunming Wu, Chew Chai, Ludvig Larsson, Menxiao He, Liqun Luo, Joakim Lundeberg, Bo Wang
 
 Copyright (C) 2022  Yuhang Fan & Zaneta Andrusivova
