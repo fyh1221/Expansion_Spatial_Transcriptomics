@@ -1,4 +1,4 @@
-# Mouse brain samples (MOB + Hippocampus, standard Visium and Ex-ST) Stereoscope Analysis
+# Mouse brain samples
 
 ## Load packages
 library(STutility)
@@ -78,3 +78,52 @@ ggplot(mob_final_df, aes(x=log_counts_mob1, y=log_counts_mob2)) + geom_point() +
       geom_smooth(method='lm', color='red') +
       ggtitle(label = "log1p(UMI counts)") +
       theme_bw() + theme_light()
+
+
+## Plot UMI/nGenes per replicate (MOB)
+
+pdf("UMI_MOB.pdf")
+VlnPlot(se_mob, features = "nCount_RNA", pt.size = 0, group.by = "sample_id")
+dev.off()
+
+
+pdf("nGenes_MOB.pdf")
+VlnPlot(se_mob, features = "nFeature_RNA", pt.size = 0, group.by = "sample_id")
+dev.off()
+
+## Plot nGenes for expanded and non expanded samples
+## subset dataset to contain only standard Visium MOB sample
+v_mob <- SubsetSTData(se, sample_id == "V_MOB")
+
+
+## divide nFeature of non expanded MOB by expansion value
+v_mob$genes_div <- v_mob$nFeature_RNA/6.25
+
+## subset expanded mob samples
+exp_mob <- SubsetSTData(se, assay == "Ex-ST")
+exp_mob <- SubsetSTData(exp_mob, anat == "MOB")
+
+## ad column to exp mob object
+exp_mob$genes_div <- exp_mob$nFeature_RNA
+
+## merge seurat objects
+se_merged <- MergeSTData(x = exp_mob, y = v_mob)
+
+## plot nGenes adjusted by expansion value
+VlnPlot(se_merged, features = "genes_div", group.by = "assay", pt.size = 0)
+
+## plot nGenes - original values (not adjusted)
+VlnPlot(se_merged, features = "nFeature_RNA", group.by = "assay", pt.size = 0)
+
+## Plot adjusted Gene counts with p-value
+## export metadata from the seurat object
+metadata <- se_merged@meta.data
+
+## Plot violin plots with p-value
+p <- ggplot(metadata, aes(x=assay, y=genes_div, fill=assay)) + 
+  geom_violin() + theme_classic() +
+  xlab("Assay") + ylab("nGenes") +
+  ggtitle("nGenes adjusted") +
+  scale_fill_manual(values=c("#F1CFC8", "#C7DDEE"))
+
+p + stat_compare_means()
